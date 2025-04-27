@@ -17,12 +17,12 @@ function encodePassword(password) {
     const encoded = [];
     for (let i = 0; i < maxLength; i++) {
         if (i < password.length) {
-            encoded.push(charToIdx[password[i]] || 0);
+            encoded.push(charToIdx[password[i]] ? BigInt(charToIdx[password[i]]) : BigInt(0));
         } else {
-            encoded.push(0); 
+            encoded.push(BigInt(0));
         }
     }
-    return new Int32Array(encoded);
+    return new BigInt64Array(encoded);
 }
 
 async function predictStrength() {
