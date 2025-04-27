@@ -29,7 +29,7 @@ async function predictStrength() {
     const password = document.getElementById('passwordInput').value;
     const encoded = encodePassword(password);
 
-    const tensor = new ort.Tensor('int32', encoded, [1, maxLength]);
+    const tensor = new ort.Tensor('int64', encoded, [1, maxLength]);
     const feeds = { input: tensor };
     const output = await session.run(feeds);
     const prediction = output.output.data;
