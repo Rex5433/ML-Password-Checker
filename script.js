@@ -1,7 +1,8 @@
 let session;
-const charToIdx = {};
+const charToIdx = {}; // Character to index mapping
 const maxLength = 16;
 
+// Load model on page load
 window.onload = async () => {
     session = await ort.InferenceSession.create('password_strength_cnn.onnx');
     console.log('ONNX Model loaded.');
@@ -14,7 +15,7 @@ window.onload = async () => {
 };
 
 function encodePassword(password) {
-    const encoded = new Int32Array(maxLength);
+    const encoded = new Float32Array(maxLength);
     for (let i = 0; i < maxLength; i++) {
         if (i < password.length) {
             encoded[i] = charToIdx[password[i]] ? charToIdx[password[i]] : 0;
@@ -27,9 +28,15 @@ function encodePassword(password) {
 
 async function predictStrength() {
     const password = document.getElementById('passwordInput').value;
-    const encoded = encodePassword(password);
+    const resultDiv = document.getElementById('result');
 
-    const tensor = new ort.Tensor('int32', encoded, [1, maxLength]);
+    if (password.trim() === "") {
+        resultDiv.style.display = "none";
+        return;
+    }
+
+    const encoded = encodePassword(password);
+    const tensor = new ort.Tensor('float32', encoded, [1, maxLength]);
     const feeds = { input: tensor };
     const output = await session.run(feeds);
     const prediction = output.output.data;
@@ -41,5 +48,15 @@ async function predictStrength() {
     else if (predictedClass === 1) strength = 'Average';
     else if (predictedClass === 2) strength = 'Strong';
 
-    document.getElementById('result').innerText = `Predicted Strength: ${strength}`;
+    resultDiv.innerText = `Predicted Strength: ${strength}`;
+    resultDiv.style.display = "block";
+}
+
+function togglePassword() {
+    const passwordField = document.getElementById('passwordInput');
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+    } else {
+        passwordField.type = "password";
+    }
 }
