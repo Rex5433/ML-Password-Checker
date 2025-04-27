@@ -17,19 +17,19 @@ function encodePassword(password) {
     const encoded = [];
     for (let i = 0; i < maxLength; i++) {
         if (i < password.length) {
-            encoded.push(charToIdx[password[i]] ? BigInt(charToIdx[password[i]]) : BigInt(0));
+            encoded.push(charToIdx[password[i]] ? charToIdx[password[i]] : 0);
         } else {
-            encoded.push(BigInt(0));
+            encoded.push(0); // Padding
         }
     }
-    return new BigInt64Array(encoded);
+    return new Int32Array(encoded);
 }
 
 async function predictStrength() {
     const password = document.getElementById('passwordInput').value;
     const encoded = encodePassword(password);
 
-    const tensor = new ort.Tensor('int64', encoded, [1, maxLength]);
+    const tensor = new ort.Tensor('int32', encoded, [1, maxLength]);
     const feeds = { input: tensor };
     const output = await session.run(feeds);
     const prediction = output.output.data;
