@@ -14,15 +14,15 @@ window.onload = async () => {
 };
 
 function encodePassword(password) {
-    const encoded = [];
+    const encoded = new Int32Array(maxLength);
     for (let i = 0; i < maxLength; i++) {
         if (i < password.length) {
-            encoded.push(charToIdx[password[i]] ? charToIdx[password[i]] : 0);
+            encoded[i] = charToIdx[password[i]] ? charToIdx[password[i]] : 0;
         } else {
-            encoded.push(0); // Padding
+            encoded[i] = 0;
         }
     }
-    return new Int32Array(encoded);
+    return encoded;
 }
 
 async function predictStrength() {
