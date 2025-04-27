@@ -14,21 +14,27 @@ window.onload = async () => {
 };
 
 function encodePassword(password) {
-    const encoded = new Int32Array(maxLength);
+    const encoded = [];
     for (let i = 0; i < maxLength; i++) {
         if (i < password.length) {
-            encoded[i] = charToIdx[password[i]] ? charToIdx[password[i]] : 0;
+            encoded.push(charToIdx[password[i]] || 0);
         } else {
-            encoded[i] = 0;
+            encoded.push(0); 
         }
     }
-    return encoded;
+    return new Int32Array(encoded);
 }
 
 async function predictStrength() {
     const password = document.getElementById('passwordInput').value;
-    const encoded = encodePassword(password);
+    const resultDiv = document.getElementById('result');
 
+    if (password.trim() === "") {
+        resultDiv.style.display = "none";
+        return;
+    }
+
+    const encoded = encodePassword(password);
     const tensor = new ort.Tensor('int32', encoded, [1, maxLength]);
     const feeds = { input: tensor };
     const output = await session.run(feeds);
@@ -41,7 +47,8 @@ async function predictStrength() {
     else if (predictedClass === 1) strength = 'Average';
     else if (predictedClass === 2) strength = 'Strong';
 
-    document.getElementById('result').innerText = `Predicted Strength: ${strength}`;
+    resultDiv.innerText = `Predicted Strength: ${strength}`;
+    resultDiv.style.display = "block";
 }
 
 function togglePassword() {
